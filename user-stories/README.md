@@ -29,6 +29,5 @@ The system supports three primary actors—**Admin**, **Guest**, and **Host**—
 
 ![Airbnb Backend Use Case Diagram](use-case-diagram/use-case-diagram.png)
 
-
 This use case diagram serves as a blueprint for developing and organizing backend features in an Airbnb-like application.
 
