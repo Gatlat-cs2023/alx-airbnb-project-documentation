@@ -1,33 +1,23 @@
-# Airbnb Backend System - Use Case Description
+# User Stories – Airbnb Backend System
 
-This use case diagram represents the core functionality of an **Airbnb Backend System**, illustrating how different actors interact with the system's main components.
+This directory contains user stories derived from the Airbnb Backend System use case diagram created in Task 1 of the ALX project.
 
-## 📋 Use Case Description
+## 📌 Objective
 
-The system supports three primary actors—**Admin**, **Guest**, and **Host**—alongside an external **Payment Gateway**. Each actor interacts with various backend services to perform their roles:
+Translate system interactions into user stories to describe what different types of users want to achieve with the system.
 
-- **Admin** can:
-  - Moderate property **Listings**
+These user stories guide feature planning and ensure the backend system meets real user needs.
 
-- **Guest** can:
-  - Search **Properties**
-  - Book **Listings**
-  - Make **Payments**
-  - Manage **Bookings**
-  - Leave **Reviews**
-  - Send **Messages** to Hosts
+## 📁 Contents
 
-- **Host** can:
-  - View **Bookings**
-  - View **Reviews**
-  - Respond to **Messages**
+- `user-stories.md`: A Markdown file containing user stories for Admins, Guests, Hosts, and the Payment Gateway.
 
-- **Payment Gateway**:
-  - Processes and handles payments through the **Payment** system
+## 🧠 Format
 
-## 🧩 Use Case Diagram
+Each user story follows the standard format:
 
-![Airbnb Backend Use Case Diagram](use-case-diagram/use-case-diagram.png)
+## ✅ Requirements
 
-This use case diagram serves as a blueprint for developing and organizing backend features in an Airbnb-like application.
-
+- Minimum of 5 user stories
+- Covers interactions for Admin, Guest, Host, and Payment Gateway
+- Based on the use case diagram from Task 1
