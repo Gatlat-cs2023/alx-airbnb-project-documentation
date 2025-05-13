@@ -1,86 +1,183 @@
-# Airbnb Clone - Backend Requirements
+# 📄 Backend Requirements Specification - Airbnb Backend System
 
-## 1. User Authentication
-
-### Functional Requirements
-- Users can register with email/password or OAuth (Google)
-- JWT token generation for authenticated sessions
-- Password reset via email
-
-### Technical Specifications
-| Component            | Details                                                                 |
-|----------------------|-------------------------------------------------------------------------|
-| **API Endpoint**     | `POST /api/auth/register`                                               |
-| **Input**           | `{ "email": "user@example.com", "password": "SecureP@ss123" }`          |
-| **Validation**      | - Email format validation<br>- Password: min 8 chars, 1 special char    |
-| **Output**         | `{ "token": "jwt.xyz", "user_id": "uuid" }`                            |
-| **Performance**    | Response time < 500ms under 100 concurrent requests                     |
+This document outlines the **technical** and **functional** specifications for key backend features of the Airbnb backend system. It covers API endpoints, data formats, validation rules, and performance expectations.
 
 ---
 
-## 2. Property Management
+## ✅ 1. User Authentication
 
-### Functional Requirements
-- Hosts can create/update/delete listings
-- Image upload (max 5MB per image)
-- Location-based search
+### Objective
+Allow users (guests, hosts, admins) to securely register, log in, and manage sessions.
 
-### Technical Specifications
-| Component            | Details                                                                 |
-|----------------------|-------------------------------------------------------------------------|
-| **API Endpoint**     | `POST /api/properties`                                                  |
-| **Input**           | ```json
-{
-  "title": "Beach Villa",
-  "description": "Luxury beachfront property",
-  "price_per_night": 150,
-  "location": { "lat": 34.05, "lng": -118.24 }
-}
-``` |
-| **Validation**      | - Price must be > 0<br>- Location coordinates required                 |
-| **Output**         | `{ "property_id": "uuid", "status": "published" }`                     |
-| **Performance**    | Handle 50+ images/day with AWS S3 integration                          |
+### API Endpoints
+
+| Method | Endpoint         | Description               |
+|--------|------------------|---------------------------|
+| POST   | /api/v1/signup   | Register a new user       |
+| POST   | /api/v1/login    | Log in an existing user   |
+| POST   | /api/v1/logout   | Log out the current user  |
+
+### Input/Output Specification
+
+- **POST /signup**
+  - **Request Body:**
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "secret123",
+      "role": "guest"
+    }
+    ```
+  - **Response:**
+    ```json
+    {
+      "message": "User registered successfully.",
+      "user_id": "uuid"
+    }
+    ```
+
+- **POST /login**
+  - **Request Body:**
+    ```json
+    {
+      "email": "john@example.com",
+      "password": "secret123"
+    }
+    ```
+  - **Response:**
+    ```json
+    {
+      "token": "jwt-token",
+      "expires_in": 3600
+    }
+    ```
+
+### Validation Rules
+- Email must be unique and valid format.
+- Password minimum 8 characters, at least 1 number & 1 capital letter.
+- Role must be one of: guest, host, admin.
+
+### Performance Criteria
+- Authentication responses < 500ms.
+- Passwords must be hashed using bcrypt or equivalent.
 
 ---
 
-## 3. Booking System
+## 🏠 2. Property Management
 
-### Functional Requirements
-- Date availability checking
-- Booking confirmation with payment
-- Cancellation policy enforcement
+### Objective
+Enable hosts to list, update, and delete properties. Allow admin moderation.
 
-### Technical Specifications
-| Component            | Details                                                                 |
-|----------------------|-------------------------------------------------------------------------|
-| **API Endpoint**     | `POST /api/bookings`                                                    |
-| **Input**           | ```json
-{
-  "property_id": "uuid",
-  "start_date": "2025-12-01",
-  "end_date": "2025-12-07"
-}
-``` |
-| **Validation**      | - Dates must be future dates<br>- Minimum 1-night stay                  |
-| **Output**         | ```json
-{
-  "booking_id": "uuid",
-  "total_price": 1050,
-  "payment_status": "pending"
-}
-``` |
-| **Performance**    | Process 100+ concurrent bookings without date conflicts                 |
+### API Endpoints
+
+| Method | Endpoint             | Description                      |
+|--------|----------------------|----------------------------------|
+| POST   | /api/v1/properties   | Host adds new property listing   |
+| GET    | /api/v1/properties   | Get all approved properties      |
+| PATCH  | /api/v1/properties/:id | Update property details        |
+| DELETE | /api/v1/properties/:id | Delete a property               |
+| PATCH  | /api/v1/properties/:id/status | Admin approves/rejects listing |
+
+### Input/Output Specification
+
+- **POST /properties**
+  - **Request Body:**
+    ```json
+    {
+      "title": "Cozy Apartment",
+      "description": "Close to beach",
+      "price_per_night": 75,
+      "location": "Addis Ababa",
+      "amenities": ["wifi", "kitchen"],
+      "images": ["url1", "url2"]
+    }
+    ```
+
+  - **Response:**
+    ```json
+    {
+      "message": "Property submitted for review.",
+      "property_id": "uuid"
+    }
+    ```
+
+### Validation Rules
+- Price must be numeric and greater than 0.
+- Title and description required.
+- Host must be authenticated.
+- Admin can approve/reject before visibility.
+
+### Performance Criteria
+- Listing creation < 800ms.
+- Admin review queue supports pagination and filters.
 
 ---
 
-## Validation Rules Summary
-1. **Email**: Regex `^[^\s@]+@[^\s@]+\.[^\s@]+$`
-2. **Password**: Minimum 8 chars with 1 uppercase, 1 number, 1 special char
-3. **Dates**: `end_date` must be after `start_date`
+## 📅 3. Booking System
 
-## Error Handling
-| Code | Scenario                     | Response Body                          |
-|------|------------------------------|----------------------------------------|
-| 400  | Invalid dates                | `{ "error": "Invalid date range" }`    |
-| 401  | Unauthorized property edit   | `{ "error": "Access denied" }`         |
-| 429  | Rate limit exceeded          | `{ "error": "Too many requests" }`     |
+### Objective
+Enable guests to book available properties and hosts to view/manage bookings.
+
+### API Endpoints
+
+| Method | Endpoint                 | Description                  |
+|--------|--------------------------|------------------------------|
+| POST   | /api/v1/bookings         | Create a new booking         |
+| GET    | /api/v1/bookings/guest   | Get all bookings for guest   |
+| GET    | /api/v1/bookings/host    | Get all bookings for host    |
+| PATCH  | /api/v1/bookings/:id     | Update (cancel) a booking    |
+
+### Input/Output Specification
+
+- **POST /bookings**
+  - **Request Body:**
+    ```json
+    {
+      "property_id": "uuid",
+      "check_in": "2025-07-01",
+      "check_out": "2025-07-07",
+      "guests": 2
+    }
+    ```
+  - **Response:**
+    ```json
+    {
+      "message": "Booking confirmed.",
+      "booking_id": "uuid"
+    }
+    ```
+
+### Validation Rules
+- Dates must be valid and `check_out > check_in`.
+- Guests must not exceed property's allowed capacity.
+- Property must be available during the selected dates.
+- Payment must be confirmed (via integration).
+
+### Performance Criteria
+- Booking confirmation < 1000ms.
+- Prevent double bookings via lock or atomic transactions.
+
+---
+
+## 🧩 Notes
+
+- All endpoints should be secured using token-based (JWT) authentication.
+- Use RESTful principles for consistency and scalability.
+- Use PostgreSQL or MySQL for relational data storage.
+- Sensitive information (e.g., passwords, tokens) must not be logged.
+
+---
+
+## 📂 File Location
+
+- **Filename:** `requirements.md`  
+- **Path:** Root directory of `alx-airbnb-project-documentation`
+
+---
+
+## ✍️ Author
+
+Created for the **ALX Airbnb Project** under the **Backend Specialization Program**.  
+All diagrams and documentation follow industry-standard conventions.
+
