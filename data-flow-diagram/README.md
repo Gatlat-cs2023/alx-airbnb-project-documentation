@@ -41,4 +41,4 @@ Stripe API for payments
 WebSocket for notifications
 
 ## Files
-![Data Flow Diagram](data-flow-diagram.png)
+![Data Flow Diagram](data-flow.png)
