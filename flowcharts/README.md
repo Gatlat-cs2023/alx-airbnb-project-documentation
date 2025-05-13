@@ -22,7 +22,7 @@ To clearly map out how different components interact during the booking process,
 
 ---
 
-## 📂 File Structure
+## 📂 Diagram
 
 ![Data Flow Diagram](data-flow-diagram.png)
 
